@@ -32,7 +32,7 @@ CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
 # load our serialized model from disk
 print("[INFO] loading model...")
 
-net = None 
+net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"]
 
 # initialize the video stream, dlib correlation tracker, output video
 # writer, and predicted class label
@@ -66,9 +66,42 @@ while True:
 		writer = cv2.VideoWriter(args["output"], fourcc, 30,
 			(frame.shape[1], frame.shape[0]), True)
 
+if tracker is None:
+    # grab the frame dimensions and convert the frame to a blob
+    (h, w) = frame.shape[:2]
+    blob = cv2.dnn.blobFromImage(frame, 0.007843, (w, h), 127.5)
 
-	if tracker is None:
-		pass 
+    # pass the blob through the network and obtain the detections
+    net.setInput(blob)
+    detections = net.forward()
+
+    # ensure at least one detection is made
+    if len(detections) > 0:
+        # find the index of the detection with the largest probability
+        i = np.argmax(detections[0, 0, :, 2])
+
+        # grab the probability associated with the object along
+        # with its class label
+        confidence = detections[0, 0, i, 2]
+        label = CLASSES[int(detections[0, 0, i, 1])]
+
+        # filter out weak detections by requiring a minimum confidence
+        if confidence > args["confidence"] and label == args["label"]:
+            # compute the (x, y)-coordinates of the bounding box
+            box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+            (startX, startY, endX, endY) = box.astype("int")
+
+            # construct a dlib rectangle object from the bounding box
+            # coordinates and then start the dlib correlation tracker
+            tracker = dlib.correlation_tracker()
+            rect = dlib.rectangle(startX, startY, endX, endY)
+            tracker.start_track(rgb, rect)
+
+            # draw the bounding box and text for the object
+            cv2.rectangle(frame, (startX, startY), (endX, endY),
+                          (0, 255, 0), 2)
+            cv2.putText(frame, label, (startX, startY - 15),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
 
 	else:
 		pass
