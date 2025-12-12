@@ -123,3 +123,12 @@ while True:
 # stop the timer and display FPS information
 # check to see if we need to release the video writer pointer
 # do a bit of cleanup
+fps.stop()
+print("Elapsed time: {:.2f} seconds".format(fps.elapsed()))
+print("Approx. FPS: {:.2f}".format(fps.fps()))
+
+if writer is not None:
+    writer.release()
+
+cv2.destroyAllWindows()
+vs.release()
