@@ -32,7 +32,9 @@ CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
 # load our serialized model from disk
 print("[INFO] loading model...")
 
-net = None 
+net = cv2.dnn.readNetFromCaffe(
+    args["prototxt"], args["model"]
+)
 
 # initialize the video stream, dlib correlation tracker, output video
 # writer, and predicted class label
@@ -67,8 +69,38 @@ while True:
 			(frame.shape[1], frame.shape[0]), True)
 
 
-	if tracker is None:
-		pass 
+		if tracker is None:
+		blob = cv2.dnn.blobFromImage(
+			frame, 0.007843, (300, 300), 127.5
+		)
+		net.setInput(blob)
+		detections = net.forward()
+
+		(h, w) = frame.shape[:2]
+
+		for i in range(0, detections.shape[2]):
+			confidence = detections[0, 0, i, 2]
+
+			if confidence < args["confidence"]:
+				continue
+
+			idx = int(detections[0, 0, i, 1])
+			if CLASSES[idx] != args["label"]:
+				continue
+
+			box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+			(x1, y1, x2, y2) = box.astype("int")
+
+			x1, y1 = max(0, x1), max(0, y1)
+			x2, y2 = min(w - 1, x2), min(h - 1, y2)
+
+			tracker = dlib.correlation_tracker()
+			rect = dlib.rectangle(x1, y1, x2, y2)
+			tracker.start_track(rgb, rect)
+
+			label = args["label"]
+			break
+
 
 	else:
 		pass
