@@ -103,8 +103,26 @@ if tracker is None:
             cv2.putText(frame, label, (startX, startY - 15),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
 
+	# otherwise, we've already performed detection so let's track
+	# the object
 	else:
-		pass
+		# update the tracker and grab the position of the tracked
+		# object
+		tracker.update(rgb)
+		pos = tracker.get_position()
+
+		# unpack the position object
+		startX = int(pos.left())
+		startY = int(pos.top())
+		endX = int(pos.right())
+		endY = int(pos.bottom())
+
+		# draw the bounding box from the correlation object tracker
+		cv2.rectangle(frame, (startX, startY), (endX, endY),
+			(0, 255, 0), 2)
+		cv2.putText(frame, label, (startX, startY - 15),
+			cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
+		
     
 	# check to see if we should write the frame to disk
 	if writer is not None:
@@ -120,6 +138,19 @@ if tracker is None:
 
 	# update the FPS counter
 	fps.update()
+
+# stop the timer and display FPS information
+fps.stop()
+print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
+print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
+
+# check to see if we need to release the video writer pointer
+if writer is not None:
+	writer.release()
+
+# do a bit of cleanup
+cv2.destroyAllWindows()
+vs.release()
 
 # stop the timer and display FPS information
 # check to see if we need to release the video writer pointer
