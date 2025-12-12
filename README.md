@@ -36,6 +36,8 @@ The results show decent real-time performance, successfully maintaining the boun
 This system effectively demonstrates the efficiency of the hybrid approach:
 - Initial Frame: The detection process is slower due to the MobileNet SSD model loading and execution.
 - Subsequent Frames: Tracking is significantly faster and more stable, relying on the low-cost Dlib Correlation Tracker rather than repeated deep learning inference.
+<img width="304" height="172" alt="image" src="https://github.com/user-attachments/assets/80cbfe85-fdd6-4bf0-93e3-dd86cef360a5" />
+
 
 ## The limitations:
 The slight imperfections, such as minor drifting or temporary loss of tracking during rapid changes in object scale or quick occlusion, are primarily due to:
