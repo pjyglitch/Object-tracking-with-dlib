@@ -32,7 +32,7 @@ CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
 # load our serialized model from disk
 print("[INFO] loading model...")
 
-net = None 
+net = cv2.dnn.readNetFromCaffe(args["prototxt"], args["model"]
 
 # initialize the video stream, dlib correlation tracker, output video
 # writer, and predicted class label
@@ -102,8 +102,6 @@ if tracker is None:
                           (0, 255, 0), 2)
             cv2.putText(frame, label, (startX, startY - 15),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
-
-
 
 	else:
 		pass
